@@ -12,7 +12,6 @@ def main():
         nQuads = NQuads.Parse(line)
         for nQuad in nQuads:
             triple = Triple.FromNQuad(nQuad)
-
             # Watch for newer versions for the current URL
             if (
                 triple.subject.Type() == Value.Type.CONTENT and
@@ -41,11 +40,12 @@ def main():
 
                 # Start reading triples for the next URL
                 url = str(triple.subject)
-                latestVersion = None
+                latestVersion = str(triple.object)
             # Check for a new crawl UUID
             elif triple.object == "http://www.w3.org/ns/prov#Activity":
                 crawlUUID = str(triple.subject)
                 url = None
+                latestVersion = None
 
 #=============================================================================#
 
