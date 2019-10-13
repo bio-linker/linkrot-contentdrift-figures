@@ -1,84 +1,72 @@
-import codecs
 import re
 from uuid import uuid4 as UUID
 import sys
 
 
-def main(logFile):
+def main():
 
-    ### Parse n-quads from log
-    allNQuads = []
-    with codecs.open(logFile, 'r', encoding='utf-8', errors='ignore') as file:
-        nQuads = NQuads.Parse(file.read())
-        allNQuads += nQuads
-
-    ### Create an index of subjects, verbs, objects, and triples
-    fullIndex = Index(allNQuads)
-
-    ### Find the UUID of the crawl activity
-    crawlNode = None
-    for t in fullIndex.verbLookup["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"].triples:
-        if t.object == "http://www.w3.org/ns/prov#Activity":
-            crawlNode = t.subject
-            break
-    crawlUUID = str(crawlNode)
-
-    ### Find download events and construct qualifiedGenerations
     url = None
-    newLines = []
-    context = []
-    for i, nQuad in enumerate(allNQuads):
-        triple = Triple.FromNQuad(nQuad)
-        if (triple.subject.Type() == Value.Type.URL and
-            triple.verb == "http://purl.org/pav/hasVersion" and
-            triple.object.Type() == Value.Type.CONTENT
-        ):
-            # When a new key triple is encountered, process the triples associated with the previous one
-            if url and len(context) > 0:
-                newLines += MakeQualifiedGeneration(url, context, crawlUUID)
+    latestVersion = None
+    crawlUUID = None
+    for line in sys.stdin:
+        nQuads = NQuads.Parse(line)
+        for nQuad in nQuads:
+            triple = Triple.FromNQuad(nQuad)
 
-            # Start collecting triples for the next URL
-            context = []
-            url = str(triple.subject)
-        context.append(nQuad)
+            # Watch for newer versions for the current URL
+            if (
+                triple.subject.Type() == Value.Type.CONTENT and
+                triple.verb == "http://purl.org/pav/previousVersion" and
+                triple.object.Type() == Value.Type.CONTENT
+            ):
+                latestVersion = str(triple.subject)
+            # Watch for existing qualified generations
+            elif (
+                triple.subject.Type() == Value.Type.CONTENT and
+                triple.verb == "http://www.w3.org/ns/prov#qualifiedGeneration" and
+                triple.object.Type() == Value.Type.UUID
+            ):
+                # No need to log a new download event
+                url = None
+            # Check for the start of a download event
+            elif (
+                crawlUUID and
+                triple.subject.Type() == Value.Type.URL and
+                triple.verb == "http://purl.org/pav/hasVersion" and
+                triple.object.Type() == Value.Type.CONTENT
+            ):
+                # Create a generation for the previous
+                if url and latestVersion:
+                    PrintQualifiedGeneration(url, latestVersion, crawlUUID)
 
-    # Process the final URL
-    newLines += MakeQualifiedGeneration(url, context, crawlUUID)
-
-    ### Output the new lines
-    print("\n".join(newLines))
+                # Start reading triples for the next URL
+                url = str(triple.subject)
+                latestVersion = None
+            # Check for a new crawl UUID
+            elif triple.object == "http://www.w3.org/ns/prov#Activity":
+                crawlUUID = str(triple.subject)
+                url = None
 
 #=============================================================================#
 
-def MakeQualifiedGeneration(url, context, crawlUUID):
-    # The first line is always a `hasVersion` statement; default to this version if no other exists
-    latestVersion = Triple.FromNQuad(context[0]).object
-    for nQuad in context:
-        triple = Triple.FromNQuad(nQuad)
-        if (
-            triple.subject.Type() == Value.Type.CONTENT and
-            triple.verb == "http://purl.org/pav/previousVersion" and
-            triple.object.Type() == Value.Type.CONTENT
-        ):
-            latestVersion = triple.subject
-
+def PrintQualifiedGeneration(url, latestVersion, crawlUUID):
     qualGenUUID = UUID()
 
-    newLines = [
-        "<%s> <%s> <%s> ." % \
-            (str(latestVersion), "http://www.w3.org/ns/prov#qualifiedGeneration", str(qualGenUUID)),
+    print("<%s> <%s> <%s> ." %
+        (str(latestVersion), "http://www.w3.org/ns/prov#qualifiedGeneration", str(qualGenUUID))
+    )
 
-        "<%s> <%s> <%s> ." % \
-            (str(qualGenUUID), "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www.w3.org/ns/prov#Generation"),
-
-        "<%s> <%s> <%s> ." % \
-            (str(qualGenUUID), "http://www.w3.org/ns/prov#activity", str(crawlUUID)),
-
-        "<%s> <%s> <%s> ." % \
-            (str(qualGenUUID), "http://www.w3.org/ns/prov#used", str(url)),
-    ]
+    print("<%s> <%s> <%s> ." %
+        (str(qualGenUUID), "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www.w3.org/ns/prov#Generation")
+    )
     
-    return newLines
+    print("<%s> <%s> <%s> ." %
+        (str(qualGenUUID), "http://www.w3.org/ns/prov#activity", str(crawlUUID))
+    )
+
+    print("<%s> <%s> <%s> ." %
+        (str(qualGenUUID), "http://www.w3.org/ns/prov#used", str(url)),
+    )
 
 #=============================================================================#
 
@@ -358,8 +346,14 @@ class Index:
 #=============================================================================#
 
 if __name__ == "__main__":
+    file = None
     if len(sys.argv) > 1:
-        logFile = sys.argv[1]
-    else:
-        logFile = sys.stdin.readline().strip()
-    main(logFile)
+        import io
+        inputPath = sys.argv[1]
+        file = open(inputPath, "r")
+        sys.stdin = io.StringIO(file.read())
+    
+    main()
+    
+    if file:
+        file.close()
