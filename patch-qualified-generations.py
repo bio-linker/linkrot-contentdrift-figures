@@ -4,7 +4,7 @@ import sys
 
 
 def main():
-    patchAll = True # enable this to patch *all* versions, not just the most recent (see https://github.com/bio-linker/linkrot-contentdrift-figures/issues/1)
+    patchPreviousOnly = True # enable this to patch only older versions, not the most recent (see https://github.com/bio-linker/linkrot-contentdrift-figures/issues/1)
     url = None
     latestVersion = None
     crawlUUID = None
@@ -19,9 +19,9 @@ def main():
                 triple.verb == "http://purl.org/pav/previousVersion" and
                 triple.object.Type() == Value.Type.CONTENT
             ):
-                latestVersion = str(triple.subject)
-                if patchAll:
+                if patchPreviousOnly:
                     PrintQualifiedGeneration(url, latestVersion, crawlUUID)
+                latestVersion = str(triple.subject)
             # Watch for existing qualified generations
             elif (
                 triple.subject.Type() == Value.Type.CONTENT and
@@ -37,15 +37,13 @@ def main():
                 triple.verb == "http://purl.org/pav/hasVersion" and
                 triple.object.Type() == Value.Type.CONTENT
             ):
-                # Create a generation for the previous
-                if not patchAll and url and latestVersion:
+                # Create a generation for the most recent version 
+                if not patchPreviousOnly and url and latestVersion:
                     PrintQualifiedGeneration(url, latestVersion, crawlUUID)
 
                 # Start reading triples for the next URL
                 url = str(triple.subject)
                 latestVersion = str(triple.object)
-                if patchAll:
-                    PrintQualifiedGeneration(url, latestVersion, crawlUUID)
             # Check for a new crawl UUID
             elif triple.object == "http://www.w3.org/ns/prov#Activity":
                 crawlUUID = str(triple.subject)
