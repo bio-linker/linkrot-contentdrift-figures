@@ -4,3 +4,4 @@ tmp
 tmp_crawls
 data
 patch-qualified-generations/new-lines
+__pycache__/*
