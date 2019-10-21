@@ -1,0 +1,7 @@
+87.98% of URLs (5,473 total) were always available
+68.33% of URLs (4,251 total) always produced the same content
+61.68% of URLs (3,837 total) were always available and always produced the same content
+7.47% of URLs (465 total) were unresolved in the last crawl
+0.51% of URLs (32 total) never resolved in any crawl
+On average, URLs break 1.73% of the time between queries
+On average, URLs contents change 24.61% of the time between queries
