@@ -6,3 +6,4 @@ data
 patch-qualified-generations/new-lines
 __pycache__/*
 *-analysis/*.npy
+.vscode
