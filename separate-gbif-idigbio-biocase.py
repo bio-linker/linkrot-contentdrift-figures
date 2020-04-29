@@ -6,6 +6,8 @@
 # or
 #   $ preston ls | python separate-gbif-idigbio-biocase.py
 #
+# To print debug information, add -v or --verbose
+#
 # By default, logs for each network are saved to
 #   GBIF: ./only-gbif.nq
 #   iDigBio: ./only-idigbio.nq
