@@ -4,6 +4,7 @@ def pamper(text):
 ACTIVITY = pamper("http://www.w3.org/ns/prov#Activity")
 CREATED_BY = pamper("http://purl.org/pav/createdBy")
 DESCRIPTION = pamper("http://purl.org/dc/terms/description")
+GENERATION = pamper("http://www.w3.org/ns/prov#Generation")
 HAD_MEMBER = pamper("http://www.w3.org/ns/prov#hadMember")
 HAS_QUALIFIED_GENERATION = pamper("http://www.w3.org/ns/prov#qualifiedGeneration")
 HAS_TYPE = pamper("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
