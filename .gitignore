@@ -5,5 +5,6 @@ tmp_crawls
 data
 patch-qualified-generations/new-lines
 __pycache__/*
+pythonutil/__pycache__
 *-analysis/*.npy
 .vscode
