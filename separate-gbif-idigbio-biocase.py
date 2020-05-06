@@ -301,6 +301,13 @@ def either(*conditions):
     )
 
 
+def nquad_to_str(nquad):
+    if "context" in nquad:
+        return "%s %s %s %s .\n" % (nquad["subject"], nquad["predicate"], nquad["object"], nquad["context"])
+    else:
+        return "%s %s %s .\n" % (nquad["subject"], nquad["predicate"], nquad["object"])
+
+
 # Called when writing lines to sneakily transform them and add missing lines; performs the same functions as past patch scripts
 def doctor_line(line):
     from uuid import uuid4 as UUID
@@ -322,6 +329,7 @@ def doctor_line(line):
     ## Replace misused "activity" verbs with "wasInformedBy"
     elif nquad["predicate"] == WAS_INFLUENCED_BY:
         nquad["predicate"] = WAS_INFORMED_BY
+        line = nquad_to_str(nquad)
 
     ## Cheat-in missing generation events
     elif nquad["predicate"] == HAS_VERSION and last_hash_with_generation != nquad["object"]:
