@@ -1,0 +1,19 @@
+SELECT ?dataset_uri ?dataset_version ?crawl_date
+WHERE {
+  values ?network { <https://biodiversitylibrary.org> } .
+  ?crawl <http://www.w3.org/ns/prov#wasStartedBy> ?preston .
+  ?crawl <http://www.w3.org/ns/prov#startedAtTime> ?crawl_date .
+  ?registry_url <http://purl.org/pav/createdBy> ?network .
+  ?registry_version <http://www.w3.org/ns/prov#qualifiedGeneration> ?registry_generation .
+  ?registry_generation <http://www.w3.org/ns/prov#used> ?registry_url .
+  ?registry_generation <http://www.w3.org/ns/prov#wasInformedBy> ?crawl  .
+
+  OPTIONAL {
+    ?registry_version (<http://www.w3.org/ns/prov#hadMember>|<http://purl.org/pav/hasVersion>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso>)+ ?dataset_uri .
+    ?dataset_generation <http://www.w3.org/ns/prov#used> ?dataset_uri . 
+    ?dataset_version <http://www.w3.org/ns/prov#qualifiedGeneration> ?dataset_generation . 
+    ?dataset_generation <http://www.w3.org/ns/prov#wasInformedBy> ?crawl .
+  }
+  FILTER (?crawl_date > "2019-03-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+}
+# LIMIT 1

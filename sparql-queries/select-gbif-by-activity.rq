@@ -1,0 +1,40 @@
+SELECT ?dataset_url ?dataset_content ?crawl_date
+WHERE {
+  GRAPH ?kickstart_network {
+    <https://gbif.org> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/prov#Organization> .
+    ?kickstart_network <http://www.w3.org/ns/prov#wasInformedBy> ?crawl .
+  }
+  GRAPH ?crawl { ?crawl <http://www.w3.org/ns/prov#startedAtTime> ?crawl_date }
+  # First page
+  GRAPH ?first_page_gen { ?first_page_gen <http://www.w3.org/ns/prov#wasInformedBy> ?kickstart_network }
+  GRAPH ?first_page_parse { ?first_page_parse <http://www.w3.org/ns/prov#wasInformedBy> ?first_page_gen }
+  {
+    # First page datasets
+    {
+      GRAPH ?dataset_gen { 
+        ?dataset_gen <http://www.w3.org/ns/prov#wasInformedBy> ?first_page_parse ;
+                    <http://www.w3.org/ns/prov#used> ?dataset_url ;
+                    <http://www.w3.org/ns/prov#generatedAtTime> ?query_time .
+        ?dataset_content <http://www.w3.org/ns/prov#qualifiedGeneration> ?dataset_gen .
+        filter(!strstarts(str(?dataset_url), "https://api.gbif.org/v1/dataset"))
+      }
+    }
+    UNION
+    # Other page datasets
+    {
+      GRAPH ?page_gen {
+        ?page_gen <http://www.w3.org/ns/prov#wasInformedBy> ?first_page_parse ;
+                  <http://www.w3.org/ns/prov#used> ?page_url .
+        filter(strstarts(str(?page_url), "https://api.gbif.org/v1/dataset"))
+      }
+      GRAPH ?page_parse { ?page_parse <http://www.w3.org/ns/prov#wasInformedBy> ?page_gen }
+      GRAPH ?dataset_gen {
+        ?dataset_gen <http://www.w3.org/ns/prov#wasInformedBy> ?page_parse ;
+                     <http://www.w3.org/ns/prov#used> ?dataset_url ;
+                     <http://www.w3.org/ns/prov#generatedAtTime> ?query_time .
+        ?dataset_content <http://www.w3.org/ns/prov#qualifiedGeneration> ?dataset_gen .
+      }
+    }
+  }
+}
+# LIMIT 1

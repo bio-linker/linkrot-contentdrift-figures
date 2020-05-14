@@ -1,0 +1,19 @@
+SELECT ?dataset_url ?dataset_content ?crawl_date
+WHERE {
+  GRAPH ?kickstart_network {
+    <https://idigbio.org> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/prov#Organization> .
+    ?kickstart_network <http://www.w3.org/ns/prov#wasInformedBy> ?crawl .
+  }
+  GRAPH ?crawl { ?crawl <http://www.w3.org/ns/prov#startedAtTime> ?crawl_date }
+  GRAPH ?pubs_gen { ?pubs_gen <http://www.w3.org/ns/prov#wasInformedBy> ?kickstart_network }
+  GRAPH ?pubs_parse { ?pubs_parse <http://www.w3.org/ns/prov#wasInformedBy> ?pubs_gen }
+  GRAPH ?rss_gen { ?rss_gen <http://www.w3.org/ns/prov#wasInformedBy> ?pubs_parse }
+  GRAPH ?rss_parse { ?rss_parse <http://www.w3.org/ns/prov#wasInformedBy> ?rss_gen }
+  GRAPH ?dataset_gen {
+    ?dataset_gen <http://www.w3.org/ns/prov#wasInformedBy> ?rss_parse ;
+                 <http://www.w3.org/ns/prov#used> ?dataset_url ;
+                 <http://www.w3.org/ns/prov#generatedAtTime> ?query_time .
+    ?dataset_content <http://www.w3.org/ns/prov#qualifiedGeneration> ?dataset_gen .
+  }
+}
+# LIMIT 1

@@ -1,0 +1,26 @@
+SELECT ?dataset_uri ?dataset_version ?crawl_date
+ WHERE {
+   # If you'd like to include only one network, uncomment the network values below.
+   values ?network { <https://gbif.org> } .
+   # values ?network { <https://idigbio.org> } .
+   ?crawl <http://www.w3.org/ns/prov#wasStartedBy> ?preston .
+   ?crawl <http://www.w3.org/ns/prov#startedAtTime> ?crawl_date .
+   ?registry_url <http://purl.org/pav/createdBy> ?network .
+   ?registry_version <http://www.w3.org/ns/prov#qualifiedGeneration> ?registry_generation .
+   ?registry_generation <http://www.w3.org/ns/prov#used> ?registry_url .
+   ?registry_generation <http://www.w3.org/ns/prov#activity> ?crawl  .
+   
+   OPTIONAL {
+     ?registry_version (<http://www.w3.org/ns/prov#hadMember>|<http://purl.org/pav/hasVersion>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso>)+ ?dataset_uri .
+     ?dataset_generation <http://www.w3.org/ns/prov#used> ?dataset_uri . 
+     ?dataset_version <http://www.w3.org/ns/prov#qualifiedGeneration> ?dataset_generation . 
+     ?dataset_generation <http://www.w3.org/ns/prov#activity> ?crawl .
+   }
+   FILTER (?crawl_date > "2019-03-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+
+   # associated prov log start - hash://sha256/261177a96185166f1c301beacf7350abff03d1b5710be6bfd8c4aff9caffef12
+}
+#LIMIT 25
+# with successive versions: 
+#$ preston history --data-dir ~/preston-archive/data -l tsv |  cut -f1 | grep -n hash://sha256/261177a96185166f1c301beacf7350abff03d1b5710be6bfd8c4aff9caffef12 | cut -d ':' -f1 | xargs -I{} bash -c "preston history --data-dir ~/preston-archive/data -l tsv | tail -n+{} | cut -f1 "
+

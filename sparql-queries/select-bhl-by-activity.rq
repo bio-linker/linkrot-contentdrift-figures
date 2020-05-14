@@ -1,0 +1,18 @@
+SELECT ?dataset_url ?dataset_content ?crawl_date
+WHERE {
+  GRAPH ?kickstart_network {
+    <https://biodiversitylibrary.org> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/prov#Organization> .
+    ?kickstart_network <http://www.w3.org/ns/prov#wasInformedBy> ?crawl .
+  }
+  graph ?crawl { ?crawl <http://www.w3.org/ns/prov#startedAtTime> ?crawl_date . }
+  GRAPH ?crawl { ?crawl <http://www.w3.org/ns/prov#startedAtTime> ?crawl_date }
+  GRAPH ?registry_gen { ?registry_gen <http://www.w3.org/ns/prov#wasInformedBy> ?kickstart_network }
+  GRAPH ?registry_parse { ?registry_parse <http://www.w3.org/ns/prov#wasInformedBy> ?registry_gen }
+  GRAPH ?dataset_gen { 
+    ?dataset_gen <http://www.w3.org/ns/prov#wasInformedBy> ?registry_parse ;
+                <http://www.w3.org/ns/prov#used> ?dataset_url ;
+                <http://www.w3.org/ns/prov#generatedAtTime> ?query_time .
+    ?dataset_content <http://www.w3.org/ns/prov#qualifiedGeneration> ?dataset_gen .
+  }
+}
+# LIMIT 1

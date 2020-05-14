@@ -1,0 +1,16 @@
+# Must include option --set tdb:unionDefaultGraph=true
+# Ex:
+#   tdbquery --loc index --query select-dataone-by-activity.rq --results tsv --set tdb:unionDefaultGraph=true
+
+SELECT ?dataset_url ?dataset_content ?crawl_date
+WHERE {
+  # <https://dataone.org> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/prov#Organization> .
+  # ?kickstart_network <http://www.w3.org/ns/prov#wasInformedBy> ?crawl .
+  ?crawl <http://www.w3.org/ns/prov#startedAtTime> ?crawl_date .
+  ?dataset_gen <http://www.w3.org/ns/prov#wasInformedBy>+ ?crawl ;
+        <http://www.w3.org/ns/prov#used> ?dataset_url .
+  ?dataset_content <http://www.w3.org/ns/prov#qualifiedGeneration> ?dataset_gen .
+	FILTER (!strstarts(str(?dataset_url), "http://cn.dataone.org/cn/v2/query/solr/"))
+  # filter(strstarts(str(?dataset_url), "https://cn.dataone.org/cn/v2/resolve/"))
+}
+# LIMIT 1

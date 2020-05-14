@@ -1,14 +1,14 @@
-Of all 69,311 observed URLs,
-	71.71% of URLs (49,703 total) were very available
-	28.99% of URLs (20,094 total) were very stable
-	24.05% of URLs (16,668 total) were very reliable (both available and stable)
-	28.29% of URLs (19,608 total) were unresolved in the last crawl
-	22.39% of URLs (15,517 total) never resolved in any crawl
-	22.32% of URLs (15,472 total) were abandoned
+Of all 81,919 observed URLs,
+	73.93% of URLs (60,564 total) were responsive
+	33.93% of URLs (22,491 total) were stable
+	24.53% of URLs (20,093 total) were reliable (both responsive and stable)
+	26.07% of URLs (21,355 total) were responsive in the last crawl
+	19.08% of URLs (15,632 total) never responded in any crawl
+	21.12% of URLs (17,303 total) were abandoned
 
-Of the 52,643 unreliable URLs,
-	37.25% of unreliable URLs (19,608 total) were not always available
-	93.49% of unreliable URLs (49,217 total) were not always stable
+Of the 61,826 unreliable URLs,
+	34.54% of unreliable URLs (21,355 total) were not always responsive
+	96.12% of unreliable URLs (59,428 total) were not always stable
 
-URLs break 5.48% of the time between queries
-URLs contents change 25.83% of the time between queries
+URLs break 2.69% of the time between queries
+URLs contents change 21.08% of the time between queries
